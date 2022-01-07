@@ -1,22 +1,24 @@
 package controllers
 
 import (
-	"github.com/astaxie/beego"
+	"shorturl/models"
 )
 
 type ExpandController struct {
-	beego.Controller
+	BaseController
 }
 
-func (this *ExpandController) Get() {
-	var result ShortResult
-	shorturl := this.Input().Get("shorturl")
-	result.UrlShort = shorturl
-	if urlcache.IsExist(shorturl) {
-		result.UrlLong = urlcache.Get(shorturl).(string)
+func (e *ExpandController) Get() {
+	var result models.ShortResult
+	shortUrl := e.Ctx.Input.Query("shorturl")
+	result.UrlShort = shortUrl
+
+	if models.CacheCond.IsExist(shortUrl) {
+		longUrl := models.CacheCond.Get(shortUrl)
+		result.UrlLong = longUrl.(string)
 	} else {
 		result.UrlLong = ""
 	}
-	this.Data["json"] = result
-	this.ServeJSON()
+	e.Data["json"] = result
+	e.ServeJSON()
 }

@@ -7,24 +7,24 @@ import (
 )
 
 var (
-	globalnum int
+	globalNum int
 )
 
 func init() {
-	globalnum = 100000000
+	globalNum = 100000000
 }
 
 func GetMD5(lurl string) string {
 	h := md5.New()
 	salt1 := "salt4shorturl"
 	io.WriteString(h, lurl+salt1)
-	urlmd5 := fmt.Sprintf("%x", h.Sum(nil))
-	return urlmd5
+	urlMd5 := fmt.Sprintf("%x", h.Sum(nil))
+	return urlMd5
 }
 
 func Generate() (tiny string) {
-	globalnum++
-	num := globalnum
+	globalNum++
+	num := globalNum
 	fmt.Println(num)
 	alpha := merge(getRange(48, 57), getRange(65, 90))
 	alpha = merge(alpha, getRange(97, 122))

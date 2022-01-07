@@ -1,13 +1,14 @@
 package main
 
 import (
-	"github.com/astaxie/beego"
-	"github.com/beego/samples/shorturl/controllers"
+	beego "github.com/beego/beego/v2/server/web"
+	_ "shorturl/routers"
 )
 
 func main() {
-	beego.Router("/", &controllers.MainController{})
-	beego.Router("/v1/shorten", &controllers.ShortController{})
-	beego.Router("/v1/expand", &controllers.ExpandController{})
+	if beego.BConfig.RunMode == "dev" {
+		beego.BConfig.WebConfig.DirectoryIndex = true
+		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
+	}
 	beego.Run()
 }

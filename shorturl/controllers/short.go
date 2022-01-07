@@ -1,48 +1,35 @@
 package controllers
 
 import (
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/cache"
-	"github.com/beego/samples/shorturl/models"
+	"github.com/beego/beego/v2/core/logs"
+	"shorturl/models"
 )
-
-var (
-	urlcache cache.Cache
-)
-
-func init() {
-	urlcache, _ = cache.NewCache("memory", `{"interval":0}`)
-}
-
-type ShortResult struct {
-	UrlShort string
-	UrlLong  string
-}
 
 type ShortController struct {
-	beego.Controller
+	BaseController
 }
-// Use Get rather than Post so that we can simulate easier in the browser
-func (this *ShortController) Get() {
-	var result ShortResult
-	longurl := this.Input().Get("longurl")
-	beego.Info(longurl)
-	result.UrlLong = longurl
-	urlmd5 := models.GetMD5(longurl)
-	beego.Info(urlmd5)
-	if urlcache.IsExist(urlmd5) {
-		result.UrlShort = urlcache.Get(urlmd5).(string)
+
+// Get Use Get rather than Post so that we can simulate easier in the browser
+func (s *ShortController) Get() {
+	var result models.ShortResult
+	longUrl := s.Ctx.Input.Query("longurl")
+	result.UrlLong = longUrl
+	urlMd5 := models.GetMD5(longUrl)
+
+	if models.CacheCond.IsExist(urlMd5) {
+		shortUrl := models.CacheCond.Get(urlMd5)
+		result.UrlShort = shortUrl.(string)
 	} else {
 		result.UrlShort = models.Generate()
-		err := urlcache.Put(urlmd5, result.UrlShort, 0)
+		err := models.CacheCond.Put(urlMd5, result.UrlShort, 0)
 		if err != nil {
-			beego.Info(err)
+			logs.Info(err)
 		}
-		err = urlcache.Put(result.UrlShort, longurl, 0)
+		err = models.CacheCond.Put(result.UrlShort, longUrl, 0)
 		if err != nil {
-			beego.Info(err)
+			logs.Info(err)
 		}
 	}
-	this.Data["json"] = result
-	this.ServeJSON()
+	s.Data["json"] = result
+	s.ServeJSON()
 }
